@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "76578114467",
+    "project_id": "realtime-quiz-wtg-v1-d7427",
+    "storage_bucket": "realtime-quiz-wtg-v1-d7427.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76578114467:android:bedd6f50d9d5cebaa9a816",
+        "android_client_info": {
+          "package_name": "com.example.realtime_quiz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeQKdgcs_uv_1CVp3igcdPB59SKLazPOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
