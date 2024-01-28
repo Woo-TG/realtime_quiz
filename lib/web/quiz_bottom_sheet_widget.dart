@@ -81,7 +81,7 @@ class _QuizBottomSheetWidgetState extends State<QuizBottomSheetWidget> {
                   );
                 }),
           ),
-          Text('정답 선택'),
+          const Text('정답 선택'),
           DropdownButton<ProblemManager>(
             value: selectedAnswer,
             items: problemItems
@@ -102,7 +102,7 @@ class _QuizBottomSheetWidgetState extends State<QuizBottomSheetWidget> {
             children: [
               TextButton(
                 onPressed: () => addOption(),
-                child: Text('선택지 추가'),
+                child: const Text('선택지 추가'),
               ),
               TextButton(
                 onPressed: () {
@@ -123,9 +123,9 @@ class _QuizBottomSheetWidgetState extends State<QuizBottomSheetWidget> {
                     title: titleTextEditingController.text.trim(),
                     answer: selectedAnswer,
                   );
-                  Navigator.of(context).pop<QuizManager>();
+                  Navigator.of(context).pop<QuizManager>(quiz);
                 },
-                child: Text('완료'),
+                child: const Text('완료'),
               ),
             ],
           )
