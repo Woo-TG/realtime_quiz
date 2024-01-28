@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +21,11 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
   List<QuizManager> quizItems = [];
 
   // 퀴즈 출제 목록
+  List<Quiz> quizList = [];
 
   // 익명로그인 정보
-  signInAnonymously(){
-    FirebaseAuth.instance.signInAnonymously().then((value){
+  signInAnonymously() {
+    FirebaseAuth.instance.signInAnonymously().then((value) {
       setState(() {
         uid = value.user?.uid ?? "";
       });
@@ -31,7 +33,7 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
   }
 
   generateQuiz() async {
-    if(quizItems.isEmpty){
+    if (quizItems.isEmpty) {
       return;
     }
     final pinCode = Random().nextInt(999999).toString().padLeft(6);
@@ -42,13 +44,18 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
     final newQuizDetailRef = quizDetailRef.push();
     newQuizDetailRef.set({
       'code': pinCode,
-      'problems': quizItems.map((e) => {
-        'title': e.title,
-        'options': e.problems?.map((e2) => e2.textEditingController.text).toList(),
-        'answerIndex': e.answer?.index,
-        'answer': e.answer?.textEditingController.text
-      },
-      ).toList(),
+      'problems': quizItems
+          .map(
+            (e) => {
+              'title': e.title,
+              'options': e.problems
+                  ?.map((e2) => e2.textEditingController.text)
+                  .toList(),
+              'answerIndex': e.answer?.index,
+              'answer': e.answer?.textEditingController.text
+            },
+          )
+          .toList(),
     });
 
     await quizStateRef.child('${newQuizDetailRef.key}').set({
@@ -69,16 +76,30 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
     });
   }
 
+  // StreamSubscription? streamSubscription;
+  streamQuizzes() {
+    database?.ref("quiz").onValue.listen((event) {
+      final data = event.snapshot.children;
+      quizList.clear();
+      for (var element in data) {
+        quizList.add(Quiz.fromJson(jsonDecode(jsonEncode(element.value))));
+      }
+      setState(() {});
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     signInAnonymously();
+    streamQuizzes();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
+    // streamSubscription?.cancel();
     super.dispose();
   }
 
@@ -122,7 +143,18 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
                               })),
                     ],
                   ),
-                  Container(),
+                  ListView.builder(
+                      itemCount: quizList.length,
+                      itemBuilder: (context, index) {
+                        final item = quizList[index];
+                        return ListTile(
+                          title: Text("code: ${item.code}"),
+                          subtitle: Text("${item.quizDetailRef}"),
+                          onTap: () {
+                            // 퀴즈를 시작하는것
+                          },
+                        );
+                      }),
                 ],
               ),
             ),
@@ -146,10 +178,11 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
         onPressed: () async {
           // todo 문제 출제을 위한 모달 띄우기
           final quiz = await showModalBottomSheet(
-              context: context, builder: (context) => QuizBottomSheetWidget(),
+            context: context,
+            builder: (context) => QuizBottomSheetWidget(),
           );
           setState(() {
-          quizItems.add(quiz);
+            quizItems.add(quiz);
           });
         },
       ),
