@@ -4,11 +4,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:realtime_quiz/firebase_options.dart';
+import 'package:realtime_quiz/quiz_app/pin_code_page.dart';
 import 'package:realtime_quiz/web/quiz_manager_page.dart';
 
 FirebaseDatabase? database;
 
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -27,7 +29,7 @@ void main() async{
       baseUrl = "127.0.0.1";
     }
   } catch (e) {
-    print("${e.toString()}");
+    debugPrint(e.toString());
   }
 
   database = FirebaseDatabase.instanceFor(
@@ -46,6 +48,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      return MaterialApp(
+        title: "실시간 퀴즈 앱",
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: const PinCodePage(),
+      );
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: '패스트캠퍼스 실시간 퀴즈앱',

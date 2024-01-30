@@ -88,6 +88,57 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
     });
   }
 
+  startQuiz(Quiz item) async {
+    final ref =
+        await database?.ref("quiz_state/${item.quizDetailRef}/state").get();
+    final currentState = ref?.value as bool;
+    if (!currentState) {
+      final quizDetailRef =
+          await database?.ref("quiz_detail/${item.quizDetailRef}").get();
+
+      final problemCount =
+          quizDetailRef?.child("/problems").children.length ?? 0;
+
+      DateTime nowDatetime = DateTime.now();
+      List<Map> triggerTimes = [];
+      int solveTime = 5;
+      for (var i = 0; i < problemCount; i++) {
+        final startTime = nowDatetime.add(Duration(
+          seconds: 5 + (i * solveTime),
+        ));
+        final endTime = startTime.add(const Duration(seconds: 5));
+        triggerTimes.add({
+          "start": startTime.millisecondsSinceEpoch,
+          "end": endTime.microsecondsSinceEpoch,
+        });
+        nowDatetime = endTime;
+      }
+
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            content: const Text("퀴즈를 시작할까요?"),
+            title: const Text("안내"),
+            actions: [
+              TextButton(
+                  onPressed: () async {
+                    await database
+                        ?.ref("quiz_state/${item.quizDetailRef}")
+                        .update({"state": true, "current": 0, "triggers": triggerTimes}, );
+
+                    if (context.mounted) {
+                    Navigator.of(context).pop();
+                    }
+                  },
+                  child: const Text("네"))
+            ],
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -151,7 +202,8 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
                           title: Text("code: ${item.code}"),
                           subtitle: Text("${item.quizDetailRef}"),
                           onTap: () {
-                            // 퀴즈를 시작하는것
+                            // todo 퀴즈를 시작하는것
+                            startQuiz(item);
                           },
                         );
                       }),
@@ -174,12 +226,12 @@ class _QuizManagerPageState extends State<QuizManagerPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () async {
           // todo 문제 출제을 위한 모달 띄우기
           final quiz = await showModalBottomSheet(
             context: context,
-            builder: (context) => QuizBottomSheetWidget(),
+            builder: (context) => const QuizBottomSheetWidget(),
           );
           setState(() {
             quizItems.add(quiz);
